@@ -5,6 +5,8 @@ import { useState } from 'react'
 const Form = ()=>{
   const  [todo, setTodo]= useState("");
   const  [todos, setTodos]= useState([]);
+  const [editingId, setEditingId] = useState(null);
+
 
    useEffect(() => {
     let todoString = localStorage.getItem("todos")
@@ -18,12 +20,13 @@ const Form = ()=>{
     localStorage.setItem("todos", JSON.stringify(todos))
   }
 
- const handleEdit = (e,id)=>{
-    let t=todos.filter(i=>i.id===id)
-    setTodo(t[0].todo)
-    savetoLocal()
-
- }
+const handleEdit=(e,id)=>{
+  const t= todos.find(u=> u.id===id)
+  console.log(t.todo)
+  setTodo(t.todo)
+  setEditingId(id);
+  
+}
 
  const handleDelet = (e,id)=>{
  let newTodos= todos.filter(item=>{
@@ -33,14 +36,30 @@ const Form = ()=>{
  savetoLocal()
  }
 
- const handleAdd = ()=>{
-  if(todo === ""){
-    return ""
+const handleAdd = () => {
+  if (!todo) return;
+
+  // If editing: update todo
+  if (editingId) {
+    const updated = todos.map(item =>
+      item.id === editingId
+        ? { ...item, todo }
+        : item
+    );
+
+    setTodos(updated);
+    setEditingId(null);
+    setTodo("");
+    savetoLocal();
+    return;
   }
-  setTodos([...todos, {id:uuidv4(), todo, isCompleted:false}])
-  setTodo("")
-  savetoLocal()
- }
+
+  // If not editing: add new todo
+  setTodos([...todos, { id: uuidv4(), todo, isCompleted: false }]);
+  setTodo("");
+  savetoLocal();
+};
+
 
  const handleChange = (e)=>{
   setTodo(e.target.value)
